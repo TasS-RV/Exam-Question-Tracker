@@ -4,7 +4,7 @@ print("""This is used to keep track of completed papers and questions from Tripo
 Enter in the format of P1-18-Q3, which represents Question 3 of 2018 Paper 1.
 To check if a full paper is complete, omit the '-Q3'.""")
 ans = True
-while ans == True:    
+while ans == False:    
     user_in = input("\n Please input details of paper and question:")
     try: 
         paper, year, question = user_in.split('-')
@@ -46,3 +46,44 @@ while ans == True:
             ans = False 
             print("Thanks for using this service!")
             raise SystemExit
+import re
+import os
+
+def write_into_reserve(input_info):
+    for direc, subdirec, files in os.walk("{}/Completed/".format(os.getcwd())):
+        paper, remainder = submit_in.split('-') #Filenames as per paper
+        if f"{paper}.txt" not in files:
+            #Anytime a questions from a paper not previously attempted is sunmitted, it must generate the file first
+            with open(f"{paper}.txt", 'w') as file_writer:
+                file_writer.writelines(input_info)
+        
+        elif f"{paper}.txt" in files: 
+            #If questions from this paper were previously attempted - 'append' mode, to prevent record of previous questions beig overwritten
+            with open(f"{paper}.txt", 'a') as file_writer:
+                file_writer.writelines(input_info)
+        
+
+                
+
+n = True
+while n:
+    submit_in = input("Which question/ paper have you completed?")
+    try: 
+        paper, year, question = submit_in.split('-')
+        format = re.compile("P[1-9]-\d{4}-Q[1-9]") #Checks Papername-Year-Question format
+
+    except ValueError: #If no question is specified, user intends to check completion of full paper
+        try:
+            paper, year = submit_in.split('-')
+            format = re.compile("P[1-9]-\d{4}") #Checks Papername-Year format only, later checks if the year is correct by making sure it is 4 digits long 
+            
+        except Exception:
+            print("Your input format might be incorrect - this can cause errors when searching for the question in the reserve. Try retyping it in the required format.")
+
+    #If matching format captured in the Regular expression, passes on into function to submit into textfiles of each paper topic
+    if format.match(submit_in) != None and len(year) == 4: #Will last another 8000 years!
+        write_into_reserve(submit_in)    
+    else:
+        print("Check the 'year' entered is 4 digits long, and remainder of input is in the correct format.")
+    
+    n = False
