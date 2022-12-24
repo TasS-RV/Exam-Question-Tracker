@@ -54,12 +54,12 @@ def write_into_reserve(input_info):
         paper, remainder = submit_in.split('-') #Filenames as per paper
         if f"{paper}.txt" not in files:
             #Anytime a questions from a paper not previously attempted is sunmitted, it must generate the file first
-            with open(f"{paper}.txt", 'w') as file_writer:
+            with open(f"/Completed/{paper}.txt", 'w') as file_writer:
                 file_writer.writelines(input_info)
         
         elif f"{paper}.txt" in files: 
             #If questions from this paper were previously attempted - 'append' mode, to prevent record of previous questions beig overwritten
-            with open(f"{paper}.txt", 'a') as file_writer:
+            with open(f"/Completed/{paper}.txt", 'a') as file_writer:
                 file_writer.writelines(input_info)
         
 
