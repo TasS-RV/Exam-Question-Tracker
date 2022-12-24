@@ -1,7 +1,35 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import Toplevel
+import re, os
 from time import sleep
+
+
+def write_into_reserve(input_info, checkstate = "Q"):
+    for direc, subdirec, files in os.walk("{}/Completed/".format(os.getcwd())):
+        if checkstate == "P":
+            paper, remainder = input_info.split('-') #Filenames as per paper
+        elif checkstate == "Q":
+            paper, year, question = input_info.split('-')
+            remainder = year+"-"+question
+
+        if f"{paper}.txt" not in files:
+            #Anytime a questions from a paper not previously attempted is sunmitted, it must generate the file first
+            with open(f"./Completed/{paper}.txt", 'w') as file_writer:
+                file_writer.write(f"{remainder}\n")
+        
+        elif f"{paper}.txt" in files: 
+            #If questions from this paper were previously attempted - 'append' mode, to prevent record of previous questions beig overwritten
+            with open(f"./Completed/{paper}.txt", 'a') as file_writer:
+                file_writer.write(f"{remainder}\n")
+    
+    confirmation_window = Toplevel()
+    lab = tk.Label(confirmation_window, text = "Question Banks updated!")
+    lab.pack()
+    confirmation_window.after(1000, confirmation_window.destroy)
+    confirmation_window.mainloop()
+
+
 
 def check_completion(user_in):
     try: 
@@ -68,14 +96,36 @@ def read_files():
   check_window.mainloop()
 
 
+def write_files():
+    submit_in = text_box2.get()
+    try: 
+        paper, year, question = submit_in.split('-')
+        format = re.compile("P[1-9]-\d{4}-Q[1-9]") #Checks Papername-Year-Question format
+        checkstate = "Q"
+    except ValueError: #If no question is specified, user intends to check completion of full paper
+        try:
+            paper, year = submit_in.split('-')
+            format = re.compile("P[1-9]-\d{4}") #Checks Papername-Year format only, later checks if the year is correct by making sure it is 4 digits long 
+            checkstate = "P"
+        except Exception:
+            messagebox.showwarning("File Format Error", "Your input format might be incorrect - this can cause errors when searching for the question in the reserve. Try retyping it in the required format.")
+            
+    #If matching format captured in the Regular expression, passes on into function to submit into textfiles of each paper topic
+    if format.match(submit_in) != None and len(year) == 4: #Will last another 8000 years!
+        write_into_reserve(submit_in, checkstate)    
+    else:
+        messagebox.showerror("File Format Error","Check the 'year' entered is 4 digits long, and remainder of input is in the correct format.")
+    
+
+
 # Create the main window
 window = tk.Tk()
 
 #Instructions for use
 messagebox.showinfo("How to use","This is used to keep track of completed papers and questions from Tripos.\nEnter in the format of P1-2018-Q3, which represents Question 3 of 2018 Paper 1.\nTo check if a full paper is complete, omit the '-Q3'.\n\nApply the same formatting when submitting questions to be written into the reserve, and it will update text files accordingly.")
-sleep(1.5)
+sleep(0.5)
 
-# Add a label to prompt the user for input
+#1st section for checking the contents of the record of all completed questions - to prevent repeats
 label = tk.Label(window, text="Please input details of paper and question:")
 label.pack(side = "top")
 
@@ -83,10 +133,20 @@ label.pack(side = "top")
 text_box = tk.Entry(window)
 text_box.pack()
 
-parentwin = window
-# Add a button to trigger the operation
+# Add a button to trigger the file checking
 button = tk.Button(window, text="Check", command=read_files)
-button.pack(side = "bottom")
+button.pack()
+
+
+#2nd section for submitting input files to add to record of completed questions
+label = tk.Label(window, text="Please input details of paper and question:")
+label.pack(side = "top")
+
+text_box2 = tk.Entry(window)
+text_box2.pack()
+
+button2 = tk.Button(window, text="Submit", command=write_files)
+button2.pack(side = "bottom")
 
 # Run the main loop
 window.mainloop()
