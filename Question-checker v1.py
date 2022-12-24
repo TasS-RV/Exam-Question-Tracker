@@ -70,7 +70,7 @@ def write_into_reserve(input_info, checkstate = "Q"):
 
                 
 
-n = True
+n = False
 while n:
     submit_in = input("Which question/ paper have you completed?")
     try: 
@@ -92,3 +92,6 @@ while n:
         print("Check the 'year' entered is 4 digits long, and remainder of input is in the correct format.")
     
     n = False
+
+with open("./Completed/P13.txt", 'r') as filereader:
+    pass
